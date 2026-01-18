@@ -5,6 +5,7 @@ import time
 import pyautogui
 import pyscreeze
 import zipfile
+from pyscreeze import ImageNotFoundException
 
 import domain
 from functools import lru_cache
@@ -28,8 +29,8 @@ def reinstall_express():
                 os.rename(old, new)
 
 
-def click(asset_path: str):
-    button_location = locate_with_cache(asset_path)
+def click(asset_path: str, timeout_s: float = 10.0):
+    button_location = wait_for_image(asset_path, timeout_s=timeout_s)
     if button_location is None:
         raise domain.ObjectNotFoundError
     pyautogui.click(pyautogui.center(tuple[int, int, int, int](button_location)))
@@ -50,6 +51,19 @@ def field_type(asset_path: str, data: str):
     pyautogui.typewrite(data, interval=0.005)
 
 
+def wait_for_image(asset_path: str, timeout_s: float = 10.0, interval_s: float = 0.2) -> pyscreeze.Box:
+    end_time = time.time() + timeout_s
+    while time.time() < end_time:
+        location = pyautogui.locateOnScreen(asset_path)
+        if location is not None:
+            return location
+        time.sleep(interval_s)
+    return None
+
+
 @lru_cache(maxsize=128)
 def locate_with_cache(asset_path: str) -> pyscreeze.Box:
-    return pyautogui.locateOnScreen(asset_path)
+    try:
+        return pyautogui.locateOnScreen(asset_path)
+    except ImageNotFoundException:
+        return None
