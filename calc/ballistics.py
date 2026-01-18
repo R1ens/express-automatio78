@@ -5,7 +5,7 @@ import pyautogui
 
 import domain
 from calc.const import app_file, app_dir
-from calc.misc import click, field_type, locate_with_cache
+from calc.misc import click, field_type, locate_with_cache, wait_for_image
 
 
 # calculate_ballistics calculates values using Express software
@@ -87,7 +87,8 @@ def calculate_ballistics(target: domain.TargetInfo, la: domain.LAInfo,
     click("./assets/menu/ballistic-calculation.png")
     time.sleep(0.1)
     click("./assets/menu/ballistic-calculation-proceed.png")
-    time.sleep(0.25)
+    if wait_for_image("./assets/menu/ballistic-calculation-results.png", timeout_s=15.0) is None:
+        raise domain.ObjectNotFoundError
 
     # View results
     click("./assets/menu/ballistic-calculation.png")
