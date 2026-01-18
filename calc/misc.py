@@ -50,6 +50,16 @@ def field_type(asset_path: str, data: str):
     pyautogui.typewrite(data, interval=0.005)
 
 
+def wait_for_image(asset_path: str, timeout_s: float = 10.0, interval_s: float = 0.2) -> pyscreeze.Box:
+    end_time = time.time() + timeout_s
+    while time.time() < end_time:
+        location = pyautogui.locateOnScreen(asset_path)
+        if location is not None:
+            return location
+        time.sleep(interval_s)
+    return None
+
+
 @lru_cache(maxsize=128)
 def locate_with_cache(asset_path: str) -> pyscreeze.Box:
     return pyautogui.locateOnScreen(asset_path)
